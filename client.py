@@ -8,7 +8,7 @@ ALPHA = 0.3  # Vai ser a taxa de aprendizado dele
 GAMMA = 0.95  # Vai ser o fator de desconto de aprendizado
 EPSILON = 0.2  # Vai ser a taxa de exploração dele
 ACTIONS = ["left", "right", "jump"]
-TOTAL_EPISODES = 5000
+TOTAL_EPISODES = 10000
 
 # Inicializa a Q-Table com zeros
 q_table = np.zeros((96, 3))
@@ -52,7 +52,7 @@ def main():
             if recompensa == -1:  # condição de parada
                 done = True
         
-        if episodio % 100 == 0:
+        if episodio % 20 == 0:
             print(f"Episódio {episodio} concluído.")
             salvar_q_table()
     
