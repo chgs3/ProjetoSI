@@ -2,16 +2,24 @@ import numpy as np
 import random
 import connection
 import time
+import os
 
 # Definições do Q-Learning
 ALPHA = 0.3  # Vai ser a taxa de aprendizado dele
 GAMMA = 0.95  # Vai ser o fator de desconto de aprendizado
-EPSILON = 0.2  # Vai ser a taxa de exploração dele
+EPSILON = 1.0  # Vai ser a taxa de exploração dele
+EPSILON_DECAY = 0.995  # Redução gradual de EPSILON
+EPSILON_MIN = 0.1  # Limite mínimo para exploração
 ACTIONS = ["left", "right", "jump"]
 TOTAL_EPISODES = 10000
 
-# Inicializa a Q-Table com zeros
+# Inicializa a Q-Table com zeros (96 estados x 3 ações)
 q_table = np.zeros((96, 3))
+
+# Atualização para carregar a QTable
+if os.path.exists("q_table.txt"):
+    q_table = np.loadtxt("q_table.txt")
+    print("Q-Table existente carregada. Continuando o treinamento...")
 
 def escolher_acao(estado):
     if random.uniform(0, 1) < EPSILON:
@@ -26,6 +34,7 @@ def obter_indice_estado(estado_bin):
     return int(estado_bin, 2)  # Converte binário para índice inteiro
 
 def main():
+    global EPSILON
     porta = 2037
     socket_jogo = connection.connect(porta)
     
@@ -52,11 +61,13 @@ def main():
             if recompensa == -1:  # condição de parada
                 done = True
         
-        if episodio % 20 == 0:
-            print(f"Episódio {episodio} concluído.")
-            salvar_q_table()
+        # Decaimento do EPSILON
+        EPSILON = max(EPSILON * EPSILON_DECAY, EPSILON_MIN)
+        
+        # Atualiza a Q-Table a cada episódio
+        salvar_q_table()
+        print(f"Episódio {episodio} concluído. EPSILON: {EPSILON:.4f}")
     
-    salvar_q_table()
     print("Treinamento concluído! Q-Table salva.")
     
 if __name__ == "__main__":
